@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <base target="_top">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  </head>
+  <style>
+    body {
+      padding: 10px;
+    }
+    #submitBtn {
+      padding: 10px;
+    }
+  </style>
+<script>
+  function runReport(form) {
+    const formObject = {
+      report: form.selectedReport.value,
+    };
+
+    // Add a check to ensure a report was selected.
+    if (!formObject.report) {
+      alert("Please select a report before clicking 'Run Report'.");
+      return; // Stop the function here.
+    }
+    google.script.run
+      .withSuccessHandler(function() {
+        // This log only appears if the SERVER function completes successfully.
+        console.log(`4. SUCCESS: Server reported that '${formObject.report}' ran successfully.`);
+      })
+      .withFailureHandler(function(error) {
+        // This log only appears if the SERVER function fails or can't be found.
+        console.error(`4. FAILED: Server returned an error: ${error.message}`);
+      })
+      .runSelectedReport(formObject);
+  }
+</script>
+  <body>
+    <form id="reportRunForm" onsubmit="event.preventDefault(); runReport(this);">
+      <div class="form-floating mb-3">
+          <select class="form-select" id="selectedReport" aria-label="List of Available AppFolio Reports">
+              <option value="" selected>Select a report...</option>
+              <option value="account_totals">Account Totals</option>
+              <option value="additional_fees">Additional Fees</option>
+              <option value="affordable_housing_hud_waitlist">Affordable Housing HUD Waitlist</option>
+              <option value="affordable_housing_hud_waitlist_activities">Affordable Housing HUD Waitlist Activities</option>
+              <option value="affordable_housing_program_status">Affordable Housing Program Status</option>
+              <option value="affordable_housing_tenant_demographic">Affordable Housing Tenant Demographic</option>
+              <option value="affordable_housing_unit_directory">Affordable Housing Unit Directory</option>
+              <option value="aged_payables_summary">Aged Payables Summary</option>
+              <option value="aged_receivables_detail">Aged Receivable Detail</option>
+              <option value="amenities_by_property">Amenities By Property</option>
+              <option value="annual_budget_comparative">Annual Budget - Comparative</option>
+              <option value="annual_budget_forecast">Annual Budget - Forecast</option>
+              <option value="appfolio_stack_usage">AppFolio Stack™ Usage</option>
+              <option value="balance_sheet">Balance Sheet</option>
+              <option value="balance_sheet_comparative">Balance Sheet - Comparative</option>
+              <option value="balance_sheet_comparison">Balance Sheet - Property Comparison</option>
+              <option value="bank_account_association">Bank Account Association</option>
+              <option value="bill_detail">Bill Detail</option>
+              <option value="budget_comparative">Budget - Comparative</option>
+              <option value="budget_comparison">Budget - Property Comparison</option>
+              <option value="cancelled_processes">Cancelled Workflows</option>
+              <option value="cash_flow">Cash Flow</option>
+              <option value="cash_flow_comparison">Cash Flow - Property Comparison</option>
+              <option value="cash_flow_detail">Cash Flow Detail</option>
+              <option value="charge_detail">Charge Detail</option>
+              <option value="chart_of_accounts">Chart of Accounts</option>
+              <option value="check_register">Check Register</option>
+              <option value="check_register_detail">Check Register Detail (Enhanced)</option>
+              <option value="completed_processes">Completed Workflows</option>
+              <option value="delinquency">Delinquency</option>
+              <option value="delinquency_as_of">Delinquency (As Of)</option>
+              <option value="deposit_register">Deposit Register</option>
+              <option value="eligible_debt_summary">Eligible Debt Summary</option>
+              <option value="email_delivery_errors">Email Delivery Errors</option>
+              <option value="expense_distribution">Expense Distribution</option>
+              <option value="expense_register">Expense Register</option>
+              <option value="fixed_assets">Fixed Assets</option>
+              <option value="flows_assigned_tasks">Realm-X Flows Assigned Tasks</option>
+              <option value="general_ledger">General Ledger</option>
+              <option value="gross_potential_rent_enhanced">Gross Potential Rent</option>
+              <option value="guest_card_inquiries">Guest Card Inquiries</option>
+              <option value="guest_cards">Guest Card Interests</option>
+              <option value="import_variances">Import Variances</option>
+              <option value="in_progress_workflows">In-Progress Workflows</option>
+              <option value="inactive_guest_cards">Inactive Guest Card Interests</option>
+              <option value="income_register">Income Register</option>
+              <option value="income_statement">Income Statement</option>
+              <option value="income_statement_comparative">Income Statement - Comparative</option>
+              <option value="income_statement_comparison">Income Statement - Property Comparison</option>
+              <option value="income_statement_date_range">Income Statement (Date Range)</option>
+              <option value="insurance_usage">Insurance Usage</option>
+              <option value="inventory_status">Inventory Status</option>
+              <option value="inventory_usage">Inventory Usage</option>
+              <option value="keys_detail">Keys Detail</option>
+              <option value="late_fee_policy_comparison">Late Fee Policy Comparison</option>
+              <option value="lease_expiration_detail">Lease Expiration Detail By Month</option>
+              <option value="lease_expiration_summary">Lease Expiration Summary By Month</option>
+              <option value="lease_history">Lease History</option>
+              <option value="leasing_agent_performance">Leasing Agent Performance</option>
+              <option value="leasing_funnel_performance">Leasing Funnel Performance</option>
+              <option value="leasing_summary">Leasing Summary</option>
+              <option value="loans">Loans</option>
+              <option value="occupancy_custom_fields">Occupancy Custom Fields</option>
+              <option value="occupancy_summary">Occupancy Summary</option>
+              <option value="owner1099">Owner 1099 Summary</option>
+              <option value="owner1099_detail">Owner 1099 Detail</option>
+              <option value="owner_custom_fields">Owner Custom Fields</option>
+              <option value="owner_directory">Owner Directory</option>
+              <option value="owner_leasing">Owner Leasing</option>
+              <option value="owner_withholdings">Owner Withholdings</option>
+              <option value="payment_plans">Payment Plans</option>
+              <option value="premium_leads_billing_detail">Premium Listing Billing Detail</option>
+              <option value="project_budget_detail">Project Budget Detail</option>
+              <option value="property_budget">Property Budget</option>
+              <option value="property_custom_fields">Property Custom Fields</option>
+              <option value="property_directory">Property Directory</option>
+              <option value="property_group_directory">Property Group Directory</option>
+              <option value="property_performance">Property Performance</option>
+              <option value="property_staff_assignments">Property Staff Assignments</option>
+              <option value="prospect_source_tracking">Prospect Source Tracking</option>
+              <option value="purchase_order">Purchase Order</option>
+              <option value="receivables_activity">Receivables Activity</option>
+              <option value="renewal_summary">Renewal Summary</option>
+              <option value="rent_roll">Rent Roll</option>
+              <option value="rent_roll_commercial">Rent Roll (Commercial)</option>
+              <option value="rent_roll_itemized">Rent Roll (Itemized)</option>
+              <option value="rentable_items">Rentable Items</option>
+              <option value="rental_applications">Rental Applications</option>
+              <option value="resident_financial_activity">Resident Financial Activity</option>
+              <option value="screening_assessments">Screening Assessments</option>
+              <option value="screening_usage">Screening Usage</option>
+              <option value="security_deposit_funds_detail">Security Deposit Funds Detail</option>
+              <option value="showings">Showings</option>
+              <option value="surveys_summary">Survey Responses</option>
+              <option value="tax_credit_building_directory">Tax Credit Building Directory</option>
+              <option value="tenant_debt_collections_status">Debt Collections Status</option>
+              <option value="tenant_directory">Tenant Directory</option>
+              <option value="tenant_ledger">Tenant Ledger</option>
+              <option value="tenant_tickler">Tenant Tickler</option>
+              <option value="tenant_transactions_summary">Tenant Transactions Summary</option>
+              <option value="tenant_unpaid_charges_summary">Tenant Unpaid Charges Summary</option>
+              <option value="tenant_vehicle_info">Tenant Vehicle Info</option>
+              <option value="trial_balance">Trial Balance</option>
+              <option value="trial_balance_by_property">Trial Balance by Property</option>
+              <option value="trust_account_balance">Trust Account Balance</option>
+              <option value="trust_account_balance_detail">Trust Account Detail</option>
+              <option value="twelve_month_cash_flow">Cash Flow - 12 Month</option>
+              <option value="twelve_month_income_statement">Income Statement - 12 Month</option>
+              <option value="unit_custom_fields">Unit Custom Fields</option>
+              <option value="unit_directory">Unit Directory</option>
+              <option value="unit_inspection">Unit Inspection</option>
+              <option value="unit_turn_detail">Unit Turn Detail</option>
+              <option value="unit_vacancy">Unit Vacancy Detail</option>
+              <option value="unpaid_balances_by_month">Unpaid Balances by Month</option>
+              <option value="upcoming_activities">Activities Summary</option>
+              <option value="vendor1099">Vendor 1099 Summary</option>
+              <option value="vendor_custom_fields">Vendor Custom Fields</option>
+              <option value="vendor_directory">Vendor Directory</option>
+              <option value="vendor_ledger">Vendor Ledger</option>
+              <option value="work_order">Work Order</option>
+              <option value="work_order_labor_summary">Work Order Labor Summary</option>
+          </select>
+          <label for="selectedReport">Available Reports</label>
+      </div>
+      <input class="btn btn-primary btn-sm" id="submitBtn" type="submit" value="Run Report"></input>
+    </form>
+       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+  </body>
+</html>
