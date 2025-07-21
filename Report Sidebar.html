@@ -15,32 +15,44 @@
     }
   </style>
 <script>
-  function runReport(form) {
-    const formObject = {
-      report: form.selectedReport.value,
-    };
+  // function runReport(form) {
+  //   const formObject = {
+  //     report: form.selectedReport.value,
+  //   };
 
-    // Add a check to ensure a report was selected.
-    if (!formObject.report) {
-      alert("Please select a report before clicking 'Run Report'.");
-      return; // Stop the function here.
+  //   // Add a check to ensure a report was selected.
+  //   if (!formObject.report) {
+  //     alert("Please select a report before clicking 'Run Report'.");
+  //     return; // Stop the function here.
+  //   }
+  //   google.script.run
+  //     .withSuccessHandler(function() {
+  //       // This log only appears if the SERVER function completes successfully.
+  //       console.log(`4. SUCCESS: Server reported that '${formObject.report}' ran successfully.`);
+  //     })
+  //     .withFailureHandler(function(error) {
+  //       // This log only appears if the SERVER function fails or can't be found.
+  //       console.error(`4. FAILED: Server returned an error: ${error.message}`);
+  //     })
+  //     .runSelectedReport(formObject);
+  // }
+    function openSpecificSidebar(form) {
+      const reportName = form.selectedReport.value;
+      if (!reportName) {
+        alert("Please select a report.");
+        return;
+      }
+      // Call a new server function to open the correct sidebar
+      google.script.run
+        .withSuccessHandler(() => console.log(`Opening sidebar for ${reportName}`))
+        .withFailureHandler(err => console.error(err.message))
+        .showReportSpecificSidebar(reportName);
     }
-    google.script.run
-      .withSuccessHandler(function() {
-        // This log only appears if the SERVER function completes successfully.
-        console.log(`4. SUCCESS: Server reported that '${formObject.report}' ran successfully.`);
-      })
-      .withFailureHandler(function(error) {
-        // This log only appears if the SERVER function fails or can't be found.
-        console.error(`4. FAILED: Server returned an error: ${error.message}`);
-      })
-      .runSelectedReport(formObject);
-  }
 </script>
   <body>
     <form id="reportRunForm" onsubmit="event.preventDefault(); runReport(this);">
       <div class="form-floating mb-3">
-          <select class="form-select" id="selectedReport" aria-label="List of Available AppFolio Reports">
+          <select class="form-select" id="selectedReport" onchange="openSpecificSidebar(this.form)" aria-label="Select a report">
               <option value="" selected>Select a report...</option>
               <option value="account_totals">Account Totals</option>
               <option value="additional_fees">Additional Fees</option>
