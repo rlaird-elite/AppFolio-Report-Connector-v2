@@ -1,94 +1,191 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <base target="_top">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <style>
-    body { padding: 15px; }
+  body { padding: 15px; }
 </style>
 <body>
-    <h5>Account Totals Report</h5>
-    <p>Fill out the parameters below to run the report.</p>
+  <h5>Account Totals Report</h5>
+  <p>Fill out the parameters below to run the report.</p>
 
-    <form id="specificReportForm" onsubmit="event.preventDefault(); runApiReport(this);">
-        <input type="hidden" id="reportEndpoint" value="<?= reportName ?>">
+  <form id="specificReportForm" onsubmit="event.preventDefault(); runApiReport(this);">
+    <input type="hidden" id="reportEndpoint" value="<?= reportName ?>">
 
-        <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="glAccountId" list="gl-accounts-list" placeholder="Select or type GL Account ID..." required>
-            <label for="glAccountId">GL Account ID (Required)</label>
-            
-            <datalist id="gl-accounts-list">
-              <? if (data && data.glAccounts && data.glAccounts.length > 0) { ?>
-                <? for (var i = 0; i < data.glAccounts.length; i++) { ?>
-                  <option value="<?= data.glAccounts[i].id ?>"><?= data.glAccounts[i].name ?></option>
-                <? } ?>
-              <? } ?>
-            </datalist>
-        </div>
+    <div class="form-floating mb-3">
+      <select id="property_visibility" class="form-control">
+        <option value="active" selected>Active (Default)</option>
+        <option value="hidden">Hidden</option>
+        <option value="all">All</option>
+      </select>
+      <label for="property_visibility">Property Visibility (Optional)</label>
+    </div>
 
-        <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="propertyIds" placeholder="e.g., 1,2,3">
-            <label for="propertyIds">Property IDs (Optional)</label>
-        </div>
-        
-        <div class="form-floating mb-3">
-            <select class="form-select" id="accountingBasis">
-                <option value="Cash" selected>Cash</option>
-                <option value="Accrual">Accrual</option>
-            </select>
-           <label for="accountingBasis">Accounting Basis</label>
-        </div>
+    <div class="form-floating mb-3">      
+      <select id="gl_Ids"></select>
+    </div>
 
-        <div class="form-floating mb-3">
-            <input type="date" class="form-control" id="postedOnFrom" required>
-            <label for="postedOnFrom">Posted Date From (Required)</label>
-        </div>
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="properties_ids" placeholder="e.g., 1,2,3">
+      <label for="properties_ids">Properties IDs (Optional)</label>
+    </div>
 
-        <div class="form-floating mb-3">
-            <input type="date" class="form-control" id="postedOnTo" required>
-            <label for="postedOnTo">Posted Date To (Required)</label>
-        </div>
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="property_groups_ids" placeholder="e.g., 1,2,3">
+      <label for="property_groups_ids">Property Groups IDs (Optional)</label>
+    </div>
 
-        <div class="d-grid">
-            <button type="submit" class="btn btn-primary">Run Report</button>
-        </div>
-    </form>
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="portfolios_ids" placeholder="e.g., 1,2,3">
+      <label for="portfolios_ids">Portfolio IDs (Optional)</label>
+    </div>
 
-    <script>
-        function runApiReport(form) {
-            const propertyIdsValue = form.propertyIds.value.trim();
-            const propertyIdsArray = propertyIdsValue ? propertyIdsValue.split(',').map(item => item.trim()).filter(item => item) : [];
-            const glAccountId = form.glAccountId.value.trim();
-            const postedOnFrom = form.postedOnFrom.value;
-            const postedOnTo = form.postedOnTo.value;
+    <div class="form-floating mb-3">
+      <input type="text" class="form-control" id="owners_ids" placeholder="e.g., 1,2,3">
+      <label for="owners_ids">Owners IDs (Optional)</label>
+    </div>
+    
+    <div class="form-floating mb-3">
+      <select class="form-select" id="accountingBasis">
+        <option value="Cash" selected>Cash</option>
+        <option value="Accrual">Accrual</option>
+      </select>
+      <label for="accountingBasis">Accounting Basis (Optional)</label>
+    </div>
 
-            if (!glAccountId || !postedOnFrom || !postedOnTo) {
-                alert("Please fill out all required fields: GL Account ID, Posted Date From, and Posted Date To.");
-                return; 
-            }
+    <div class="form-floating mb-3">
+      <input type="date" class="form-control" id="postedOnFrom" required>
+      <label for="postedOnFrom">Posted Date From (Required)</label>
+    </div>
 
-            const reportData = {
-                report: form.reportEndpoint.value,
-                property_visibility: "active",
-                gl_account_ids: glAccountId,
-                accounting_basis: form.accountingBasis.value,
-                posted_on_from: postedOnFrom,
-                posted_on_to: postedOnTo,
-                properties: {
-                    properties_ids: propertyIdsArray,
-                    property_groups_ids: [],
-                    portfolios_ids: [],
-                    owners_ids: []
-                }
-            };
+    <div class="form-floating mb-3">
+      <input type="date" class="form-control" id="postedOnTo" required>
+      <label for="postedOnTo">Posted Date To (Required)</label>
+    </div>
 
-            google.script.run
-                .withSuccessHandler(() => console.log('API call initiated with filtered payload.'))
-                .withFailureHandler(err => console.error(err.message))
-                .runSelectedReport(reportData);
+    <div class="d-grid">
+      <button type="submit" class="btn btn-primary">Run Report</button>
+    </div>
+  </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const selectGeneralLedgerIds = document.getElementById("gl_Ids");
+
+      google.script.run
+        .withSuccessHandler(function(gl_dataList) {
+          selectGeneralLedgerIds.innerHTML = '';
+
+          if (gl_dataList && gl_dataList.length > 0) {
+            gl_dataList.forEach(item => {
+              const option = new Option(item, item);
+              selectGeneralLedgerIds.add(option);
+            });
+          } else {
+            const option = new Option("No GL IDs found", "");
+            selectGeneralLedgerIds.add(option);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error("Error fetching GL data:", error);
+          selectGeneralLedgerIds.innerHTML = '<option value="">Error loading data</option>';
+        })
+        .getGeneralLedgerData();
+    });
+    
+    function runApiReport(form) { // 'form' parameter is the form element itself
+        // Get references to elements
+        const reportEndpointElement = document.getElementById("reportEndpoint");
+        const propertyVisibilityElement = document.getElementById("property_visibility");
+        const propertiesIdsElement = document.getElementById("properties_ids");
+        const propertyGroupsIdsElement = document.getElementById("property_groups_ids");
+        const portfoliosIdsElement = document.getElementById("portfolios_ids");
+        const ownersIdsElement = document.getElementById("owners_ids");
+        const glIdsElement = document.getElementById("gl_Ids");
+        const accountingBasisElement = document.getElementById("accountingBasis");
+        const postedOnFromElement = document.getElementById("postedOnFrom");
+        const postedOnToElement = document.getElementById("postedOnTo");
+
+        // Validate that all required elements exist
+        if (
+            !reportEndpointElement ||
+            !propertyVisibilityElement ||
+            !propertiesIdsElement ||
+            !propertyGroupsIdsElement ||
+            !portfoliosIdsElement ||
+            !ownersIdsElement ||
+            !glIdsElement ||
+            !accountingBasisElement ||
+            !postedOnFromElement ||
+            !postedOnToElement
+        ) {
+            console.error("One or more required form elements not found.");
+            alert("Error: Missing form elements. Please refresh and try again.");
+            return;
         }
-    </script>
+
+        // Get values
+        const reportName = reportEndpointElement.value; // Renamed to reportName for clarity
+        const propertyVisibilityValue = propertyVisibilityElement.value;
+        
+        const propertyIdsValue = propertiesIdsElement.value;
+        const propertyIdsArray = propertyIdsValue ? propertyIdsValue.split(',').map(item => item.trim()).filter(item => item) : [];
+        
+        const propertyGroupsIdsValue = propertyGroupsIdsElement.value;
+        const propertyGroupsIdsArray = propertyGroupsIdsValue ? propertyGroupsIdsValue.split(',').map(item => item.trim()).filter(item => item) : [];
+        
+        const portfoliosIdsValue = portfoliosIdsElement.value;
+        const portfoliosIdsArray = portfoliosIdsValue ? portfoliosIdsValue.split(',').map(item => item.trim()).filter(item => item) : [];
+        
+        const ownersIdsValue = ownersIdsElement.value;
+        const ownersIdsArray = ownersIdsValue ? ownersIdsValue.split(',').map(item => item.trim()).filter(item => item) : [];
+        
+        const glAccountIdsValue = glIdsElement.value;
+        const glAccountIdsArray = glAccountIdsValue ? glAccountIdsValue.split(',').map(item => item.trim()).filter(item => item) : [];
+        
+        const postedOnFrom = postedOnFromElement.value;
+        const postedOnTo = postedOnToElement.value;
+        const accountingBasisValue = accountingBasisElement.value;
+
+        // Validation
+        if (glAccountIdsArray.length === 0 || !postedOnFrom || !postedOnTo) {
+            alert("Please fill out all required fields: GL Account ID, Posted Date From, and Posted Date To.");
+            return;
+        }
+
+        // Create the actual API payload object, WITHOUT the report name
+        const apiPayload = {
+            property_visibility: propertyVisibilityValue,
+            gl_account_ids: glAccountIdsArray,
+            accounting_basis: accountingBasisValue,
+            posted_on_from: postedOnFrom,
+            posted_on_to: postedOnTo,
+            properties: {
+                properties_ids: propertyIdsArray,
+                property_groups_ids: propertyGroupsIdsArray,
+                portfolios_ids: portfoliosIdsArray,
+                owners_ids: ownersIdsArray
+            }
+        };
+
+        console.log("Report Name to send:", reportName);
+        console.log("API Payload to send:", JSON.stringify(apiPayload, null, 2));
+
+        // Pass reportName and apiPayload as separate arguments
+        google.script.run
+            .withSuccessHandler(() => {
+                console.log('API call initiated with filtered payload.');
+                alert('Report generation started successfully!');
+            })
+            .withFailureHandler(err => {
+                console.error("Error running report:", err.message);
+                alert(`Error generating report: ${err.message}`);
+            })
+            .runSelectedReport(reportName, apiPayload); // <--- Key Change Here
+    }
+  </script>
 </body>
 </html>
