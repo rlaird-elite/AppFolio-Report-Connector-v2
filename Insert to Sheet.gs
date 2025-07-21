@@ -9,32 +9,25 @@
 function handleAccountTotals(response, sheetName) {
     let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
     if (!sheet) {
-      SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
+      sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
     }
 
     let headers = [
       [
-        'Property',
-        'Property Name',
-        'Property Id',
-        'Property Address',
-        'Property Street',
-        'Property Street2',
-        'Property City',
-        'Property State',
-        'Property Zip',
-        'Reserve Amount',
-        'Net Amount',
-        'Ending Balance',
+        'Property', 'Property Name', 'Property Id', 'Property Address',
+        'Property Street', 'Property Street2', 'Property City', 'Property State', 'Property Zip',
+        'Reserve Amount', 'Net Amount', 'Ending Balance',
       ]
-    ]
+    ];
     sheet.getRange(8, 1, 1, headers[0].length).setValues(headers);
-
+    
     let output = [];
 
-    response.forEach(function (element) {
-      output.push(
-        [
+    // Check if the 'results' key exists and is an array
+    if (response && Array.isArray(response.results)) {
+      // Loop over the response.results array
+      response.results.forEach(function (element) {
+        output.push([
           element["property"],
           element["property_name"],
           element["property_id"],
@@ -48,7 +41,8 @@ function handleAccountTotals(response, sheetName) {
           element["net_amount"],
           element["ending_balance"],
         ]);
-    });
+      });
+    }
 
     if (output.length === 0) {
       output.push(["No data returned!"]);
