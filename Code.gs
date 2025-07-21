@@ -98,39 +98,129 @@ function saveConfiguration(formObject) {
   }
 }
 
-function runSelectedReport(formObject) {
-    const reportEndpoint = formObject.report;
-    console.log(reportEndpoint);
+function runSelectedReport(reportName, apiPayload) {
+    //const reportEndpoint = formObject.report;
+    Logger.log("Received Report Name: " + reportName);
+    Logger.log("Received API Payload: " + JSON.stringify(apiPayload));
 
     try {
-      callApi(reportEndpoint);
+      callApi(reportName, apiPayload);
     } catch (e) {
       console.log(`Error occured running API: ${e.toString}`);
     }
 }
 
-function callApi(endpoint) {
+function callApi(reportName, apiPayload) {
   let props = PropertiesService.getScriptProperties();
-  let url = `https://${props.getProperty('COMPANY_NAME')}.appfolio.com/api/${props.getProperty('APPFOLIO_API_VERSION')}/reports/${endpoint}.json`;
+  let url = `https://${props.getProperty('COMPANY_NAME')}.appfolio.com/api/${props.getProperty('APPFOLIO_API_VERSION')}/reports/${reportName}.json`;
   
   //Determine credentials from sheet
-  let options = {};
-  options.method = 'post';
-  options.headers = {
+  let options = {
+    method: 'post', // Use GET for fetching data
+    contentType: 'application/json',
+    headers: {
       "Authorization": "Basic " + Utilities.base64Encode(
-          props.getProperty('APPFOLIO_CLIENT_ID')
-          + ":" +
-          props.getProperty('APPFOLIO_CLIENT_SECRET')
-      ),
-      "Content-Type": "application/json"
+          props.getProperty('APPFOLIO_CLIENT_ID') + ":" + props.getProperty('APPFOLIO_CLIENT_SECRET')
+      )
+    },
+    payload: JSON.stringify(apiPayload),
+    muteHttpExceptions: true // Prevents script from stopping on API errors
   };
 
 
   let response = UrlFetchApp.fetch(url, options);
 
+  let responseCode = response.getResponseCode();
+  let responseText = response.getContentText();
+
+  Logger.log("External API Response Code: " + responseCode);
+  Logger.log("External API Raw Response Content (first 500 chars): " + responseText.substring(0, 500)); // Log only part if it's huge
+  Logger.log("External API Raw Response Content (FULL): " + responseText); // Log full for complete inspection
+
+  if (responseCode >= 400) {
+    throw new Error(`API returned an error: Status ${responseCode}, Response: ${responseText}`);
+  }
+
+  Logger.log(`External API Parsed Response: ${JSON.stringify(JSON.parse(response.getContentText()))}`)
+
   try {
-    routeAPICallback(endpoint, JSON.parse(response.getContentText()));
+    routeAPICallback(reportName, JSON.parse(response.getContentText()));
   } catch (e) {
     console.log(`Error requesting API response for URL=${url}: Error ${e.toString()}`);
+  }
+}
+
+function showReportSpecificSidebar(reportName) {
+  let sidebarTitle = "";
+  let htmlFile = "";
+  let templateData = {}; // Object to hold data for the template
+
+  // Use a switch statement to handle different reports
+  switch (reportName) {
+    case "account_totals":
+      htmlFile = "Account Totals Sidebar";
+      sidebarTitle = "Account Totals Parameters";
+      templateData.glAccounts = getGeneralLedgerData();
+      break;
+
+    default:
+      // Optional: show a generic message if no specific sidebar exists
+      SpreadsheetApp.getUi().alert(`No specific parameter sidebar has been created for the "${reportName}" report.`);
+      return;
+  }
+
+  const template = HtmlService.createTemplateFromFile(htmlFile);
+  // Pass the report name to the template for the hidden input field
+  template.data = templateData;
+  template.reportName = reportName; 
+  
+  const ui = template.evaluate().setTitle(sidebarTitle);
+  SpreadsheetApp.getUi().showSidebar(ui);
+}
+
+/**
+ * Fetches GL accounts from the AppFolio API to populate a dropdown.
+ * @returns {Array} A list of objects, each with an id and name.
+ */
+function getGeneralLedgerData() {
+  let props = PropertiesService.getScriptProperties();
+  let gl_url = `https://${props.getProperty('COMPANY_NAME')}.appfolio.com/api/${props.getProperty('APPFOLIO_API_VERSION')}/reports/general_ledger.json`;
+
+  let options = {
+    method: 'post', // Use GET for fetching data
+    contentType: 'application/json',
+    headers: {
+      "Authorization": "Basic " + Utilities.base64Encode(
+          props.getProperty('APPFOLIO_CLIENT_ID') + ":" + props.getProperty('APPFOLIO_CLIENT_SECRET')
+      )
+    },
+    muteHttpExceptions: true // Prevents script from stopping on API errors
+  };
+
+  try {
+    let response = UrlFetchApp.fetch(gl_url, options);
+    let gl_data = JSON.parse(response.getContentText());
+
+    let gl_account_ids = [];
+
+    if (gl_data && gl_data.results && Array.isArray(gl_data.results)) {
+      gl_data.results.forEach(item => {
+        if (item.account_id !== undefined && item.account_id !== null) {
+          gl_account_ids.push(item.account_id);
+        }
+      });
+
+      const uniqueAccountIds = [...new Set(gl_account_ids)];
+
+      uniqueAccountIds.sort((a, b) => Number(a) - Number(b));
+
+      return uniqueAccountIds;
+    } else {
+      console.error("gl_data.account_id is not an array or does not exist:", gl_data);
+      return [];
+    }
+  } catch (e) {
+    console.error(`Error fetching GL data: ${e.toString()}`);
+    return [];
   }
 }
